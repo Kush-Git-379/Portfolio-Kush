@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Embedded Systems &amp; Security: Kush Mehta</title>
-  <meta name="description" content="Real-time Galileo HAS decoder built at SAC/ISRO, lightweight cryptography benchmarking (ASCON, AES, DES, ECC), ESP32 secure GPS telemetry, gem5 cache analysis, and FPGA digital design by Kush Mehta."/>
+  <meta name="description" content="Real-time Galileo HAS decoder built at SAC/ISRO, edge AI surveillance on Raspberry Pi, lightweight cryptography benchmarking (ASCON, AES, DES, ECC), ESP32 secure GPS telemetry, gem5 cache analysis, and FPGA design by Kush Mehta."/>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230F0F0E'/%3E%3Ctext x='50' y='70' font-size='60' font-family='serif' fill='%23C85C2D' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
@@ -218,9 +218,59 @@
     </div>
   </div>
 
-  <!-- 04 gem5 -->
+  <!-- 04 SecureCam AIoT -->
   <div class="project-entry">
     <div class="project-num-big">04</div>
+    <div class="project-content">
+      <div class="project-meta">
+        <span class="tag accent">AIoT · Edge Computing</span>
+        <span class="tag">Raspberry Pi</span>
+        <span class="tag">Analytics of IoT · Apr 2026</span>
+      </div>
+      <h2 class="project-title-big">SecureCam: AI-Powered Smart Surveillance on Raspberry Pi</h2>
+      <p class="project-abstract">A surveillance system that runs the whole chain itself: camera to detection to database to dashboard, with nothing rented from a cloud vendor except optional telemetry. A Raspberry Pi 3B captures over the CSI bus, detects motion, streams MJPEG over authenticated HTTP, logs sessions to SQLite, and serves a live Flask dashboard. The interesting part was finding out what a Pi 3 will and will not do. Built with Vasu Mistry, Nabh Sinha and Parth Kothari.</p>
+
+      <div class="results-grid">
+        <div class="result-cell"><div class="result-label">Edge Node</div><div class="result-value">Pi 3B, Cortex-A53, 1 GB</div></div>
+        <div class="result-cell"><div class="result-label">Camera</div><div class="result-value">OV5647 CSI, 640×480</div></div>
+        <div class="result-cell"><div class="result-label">Pi Detection</div><div class="result-value">OpenCV MOG2</div></div>
+        <div class="result-cell"><div class="result-label">Laptop Detection</div><div class="result-value">YOLOv8n, 3.15M params</div></div>
+        <div class="result-cell"><div class="result-label">Pi Frame Rate</div><div class="result-value">8–15 FPS</div></div>
+        <div class="result-cell"><div class="result-label">Stream Latency</div><div class="result-value accent">&lt; 500 ms on Pi</div></div>
+        <div class="result-cell"><div class="result-label">Demo Sessions</div><div class="result-value">39 sessions, 344 events</div></div>
+        <div class="result-cell"><div class="result-label">Stream Uptime</div><div class="result-value">2,256 s continuous</div></div>
+        <div class="result-cell"><div class="result-label">Storage Cost</div><div class="result-value">~60 KB / hour</div></div>
+      </div>
+
+      <div class="highlights-box">
+        <h4>What the Pi Could and Couldn't Do</h4>
+        <ul>
+          <li>Exported YOLOv8n to ONNX (12.7 MB) and loaded it on the Pi through <code>cv2.dnn.readNetFromONNX</code>. The model ran, but inference was slow enough to stall the MJPEG stream, so deep learning stayed on the laptop</li>
+          <li>Replaced it with MOG2 background subtraction, which holds 8 to 15 FPS on the same hardware: history 300 frames, varThreshold 40, 5×5 elliptical opening, contours above 3,000 px counted as motion</li>
+          <li>The conclusion is the useful bit. A Pi 3 is a capable capture and streaming node, but real-time CNN inference needs either a Pi 4/5 or an accelerator like a Coral USB stick</li>
+          <li>Session tracking with a 4-second gap timeout, so one person walking past logs as one session rather than forty</li>
+          <li>MJPEG over <code>multipart/x-mixed-replace</code> with HTTP Basic Auth; failed attempts logged to a <code>viewer_log</code> table with client IP</li>
+          <li>Three-table SQLite schema (sessions, telemetry, viewer_log) and a seven-endpoint Flask REST API feeding a Chart.js dashboard that refreshes every 5 seconds</li>
+          <li>Anedya cloud telemetry was wired up but the demo network had no internet, so it failed over to local-only logging and lost nothing</li>
+        </ul>
+      </div>
+      <div class="tech-breakdown">
+        <h4>Technical Stack</h4>
+        <div class="tech-row">
+          <span class="tech-item">Raspberry Pi OS</span><span class="tech-item">Python 3.11</span><span class="tech-item">OpenCV 4.6</span><span class="tech-item">Picamera2</span><span class="tech-item">YOLOv8n / PyTorch</span><span class="tech-item">ONNX</span><span class="tech-item">Flask</span><span class="tech-item">SQLite</span><span class="tech-item">MJPEG / HTTP</span><span class="tech-item">Chart.js</span><span class="tech-item">SSH / VNC</span>
+        </div>
+      </div>
+      <div style="margin-top:1.2rem;">
+        <div class="project-tags">
+          <span class="tag accent">Edge Computing</span><span class="tag">Computer Vision</span><span class="tag">Raspberry Pi</span><span class="tag">YOLOv8</span><span class="tag">Flask</span><span class="tag">REST API</span><span class="tag">SQLite</span><span class="tag">MJPEG</span><span class="tag">IoT</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 gem5 -->
+  <div class="project-entry">
+    <div class="project-num-big">05</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Computer Architecture</span><span class="tag">gem5</span><span class="tag">3EC503CC24 · Nirma University · 2026</span>
@@ -264,9 +314,9 @@
     </div>
   </div>
 
-  <!-- 05 FPGA -->
+  <!-- 06 FPGA -->
   <div class="project-entry">
-    <div class="project-num-big">05</div>
+    <div class="project-num-big">06</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">FPGA</span><span class="tag">Digital Design</span><span class="tag">2EC202 · Nirma University</span>
@@ -298,9 +348,9 @@
     </div>
   </div>
 
-  <!-- 06 Log Analytics -->
+  <!-- 07 Log Analytics -->
   <div class="project-entry">
-    <div class="project-num-big">06</div>
+    <div class="project-num-big">07</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">DevOps · Scripting</span><span class="tag">Linux</span><span class="tag">3EC504ME24 · Nirma University · 2026</span>
@@ -332,9 +382,9 @@
     </div>
   </div>
 
-  <!-- 07 IoT Digital Communications -->
+  <!-- 08 IoT Digital Communications -->
   <div class="project-entry">
-    <div class="project-num-big">07</div>
+    <div class="project-num-big">08</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Review Paper</span><span class="tag">IoT · Communications</span><span class="tag">B.Tech ECE · Nirma University</span>
