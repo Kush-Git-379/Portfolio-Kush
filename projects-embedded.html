@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Embedded Systems &amp; Security: Kush Mehta</title>
-  <meta name="description" content="Real-time Galileo HAS decoder built at SAC/ISRO, edge AI surveillance on Raspberry Pi, lightweight cryptography benchmarking (ASCON, AES, DES, ECC), ESP32 secure GPS telemetry, gem5 cache analysis, and FPGA design by Kush Mehta."/>
+  <meta name="description" content="Synthesizable GF(2^8) arithmetic core in Verilog, real-time Galileo HAS decoder built at SAC/ISRO, edge AI on Raspberry Pi, lightweight cryptography benchmarking, ESP32 secure telemetry, and gem5 cache analysis by Kush Mehta."/>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230F0F0E'/%3E%3Ctext x='50' y='70' font-size='60' font-family='serif' fill='%23C85C2D' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
@@ -79,14 +79,77 @@
   <a href="index.html" class="back-link">← Back to Home</a>
   <p class="page-label">Domain: Embedded Systems &amp; Security</p>
   <h1 class="page-title">Hardware meets<br/><em>cryptography.</em></h1>
-  <p class="page-intro">Satellite navigation decoders, Verilog arithmetic cores, cache simulation, and encryption small enough to run on a microcontroller. Most of this started with a problem I couldn't look up the answer to.</p>
+  <p class="page-intro">A Verilog arithmetic core, satellite navigation decoders, cache simulation, and encryption small enough to run on a microcontroller. Most of this started with a problem I couldn't look up the answer to.</p>
 </div>
 
 <div class="projects-list">
 
-  <!-- 01 ISRO HAS Decoder -->
-  <div class="project-entry" id="isro">
+  <!-- 01 GF(2^8) RTL Core -->
+  <div class="project-entry" id="gf256">
     <div class="project-num-big">01</div>
+    <div class="project-content">
+      <div class="project-meta">
+        <span class="tag accent">RTL Design &amp; Verification</span>
+        <span class="tag">Verilog · SystemVerilog</span>
+        <span class="tag">Personal Project · 2026</span>
+      </div>
+      <h2 class="project-title-big">GF(2⁸) Arithmetic Core in Verilog, Verified Exhaustively</h2>
+      <p class="project-abstract">I wrote a Reed–Solomon erasure decoder in C++ at ISRO, then wanted to know what the arithmetic underneath it looks like in hardware. This is that: <code>gf_mul</code>, <code>gf_inv</code> and <code>gf_mac</code> as synthesizable RTL, checked against the original C++ as golden reference. It is the arithmetic layer a decoder sits on, not the decoder itself. Two multiplier microarchitectures went in so I could compare them, and the comparison turned out to be the interesting part.</p>
+
+      <div class="results-grid">
+        <div class="result-cell"><div class="result-label">Field</div><div class="result-value">GF(2⁸), poly 0x11D</div></div>
+        <div class="result-cell"><div class="result-label">Generator</div><div class="result-value">α = 2</div></div>
+        <div class="result-cell"><div class="result-label">Target</div><div class="result-value">Cyclone IV E, Quartus</div></div>
+        <div class="result-cell"><div class="result-label">Multiply Coverage</div><div class="result-value accent">65,536 / 65,536</div></div>
+        <div class="result-cell"><div class="result-label">Inverse Coverage</div><div class="result-value accent">256 / 256</div></div>
+        <div class="result-cell"><div class="result-label">MAC Checks</div><div class="result-value">1,180,160</div></div>
+        <div class="result-cell"><div class="result-label">Latches Inferred</div><div class="result-value">Zero</div></div>
+        <div class="result-cell"><div class="result-label">Shift-and-Reduce</div><div class="result-value accent">62 LEs · 7.71 ns · 129.6 MHz</div></div>
+        <div class="result-cell"><div class="result-label">Log/Antilog Table</div><div class="result-value">804 LEs · 12.95 ns · 77.2 MHz</div></div>
+      </div>
+
+      <div class="highlights-box">
+        <h4>The Result I Did Not Expect</h4>
+        <ul>
+          <li>Textbook advice is that log/antilog tables beat shift-and-reduce, because a table lookup is cheaper than a loop. On this FPGA the opposite held: the table version came out <strong>13× larger and 1.7× slower</strong></li>
+          <li>The cause was asynchronous ROM reads. Without a registered read address Quartus cannot infer M9K block memory, so it built 768 bytes of table out of logic elements instead, and the read path picked up an address decode, a 256-entry mux, a 9-bit add and a 512-entry mux</li>
+          <li>The shipped core therefore uses combinational shift-and-reduce at 62 LEs and 129.6 MHz</li>
+          <li>The transferable lesson: log/antilog is right on a CPU, where the table sits in cache and the alternative is a genuine loop. On fabric without registered-read memory, shift-and-reduce wins on area and timing at once. That is measurable, not arguable</li>
+        </ul>
+      </div>
+
+      <div class="highlights-box">
+        <h4>Verification</h4>
+        <ul>
+          <li>Golden vectors generated from the C++ decoder I wrote at ISRO, so the reference is an implementation that already worked against real satellite data</li>
+          <li>Multiply is checked over every input pair, all 65,536 of them. At 2¹⁶ combinations a complete proof is achievable, so sampling would have been the weaker claim</li>
+          <li>Inverse covers all 256 cases including the zero-input error path; MAC accumulates 1,180,160 checks</li>
+          <li>Three seeded faults were injected to confirm the benches actually fail when the design is wrong. A green run from a test that cannot fail is evidence of nothing</li>
+          <li>Synthesis reports zero inferred latches across all modules</li>
+        </ul>
+      </div>
+
+      <div class="tech-breakdown">
+        <h4>Technical Stack</h4>
+        <div class="tech-row">
+          <span class="tech-item">Verilog</span><span class="tech-item">SystemVerilog TB</span><span class="tech-item">Quartus Prime</span><span class="tech-item">Cyclone IV E</span><span class="tech-item">ModelSim</span><span class="tech-item">C++ golden model</span><span class="tech-item">Static Timing Analysis</span>
+        </div>
+      </div>
+      <div style="margin-top:1.2rem;">
+        <div class="project-tags">
+          <span class="tag accent">RTL Design</span><span class="tag">Functional Verification</span><span class="tag">Galois Field</span><span class="tag">Reed–Solomon</span><span class="tag">Logic Synthesis</span><span class="tag">Fault Injection</span><span class="tag">FPGA</span>
+        </div>
+      </div>
+      <div class="project-actions">
+        <a href="https://github.com/Kush-Git-379/gf256-rtl" target="_blank" rel="noopener" class="btn btn-primary">View on GitHub</a>
+        <a href="index.html#gf-playground" class="btn-small">Try the multiplier in your browser</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 ISRO HAS Decoder -->
+  <div class="project-entry" id="isro">
+    <div class="project-num-big">02</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Summer Internship</span>
@@ -136,9 +199,9 @@
     </div>
   </div>
 
-  <!-- 02 Crypto Simulation -->
+  <!-- 03 Crypto Simulation -->
   <div class="project-entry">
-    <div class="project-num-big">02</div>
+    <div class="project-num-big">03</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Research</span>
@@ -184,9 +247,9 @@
     </div>
   </div>
 
-  <!-- 03 ESP32 GPS Tracker -->
+  <!-- 04 ESP32 GPS Tracker -->
   <div class="project-entry">
-    <div class="project-num-big">03</div>
+    <div class="project-num-big">04</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">IoT · Security</span><span class="tag">ESP32</span><span class="tag">3EC504ME24 · Nirma University</span>
@@ -218,9 +281,9 @@
     </div>
   </div>
 
-  <!-- 04 SecureCam AIoT -->
+  <!-- 05 SecureCam AIoT -->
   <div class="project-entry">
-    <div class="project-num-big">04</div>
+    <div class="project-num-big">05</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">AIoT · Edge Computing</span>
@@ -268,9 +331,9 @@
     </div>
   </div>
 
-  <!-- 05 gem5 -->
+  <!-- 06 gem5 -->
   <div class="project-entry">
-    <div class="project-num-big">05</div>
+    <div class="project-num-big">06</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Computer Architecture</span><span class="tag">gem5</span><span class="tag">3EC503CC24 · Nirma University · 2026</span>
@@ -314,9 +377,9 @@
     </div>
   </div>
 
-  <!-- 06 FPGA -->
+  <!-- 07 FPGA -->
   <div class="project-entry">
-    <div class="project-num-big">06</div>
+    <div class="project-num-big">07</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">FPGA</span><span class="tag">Digital Design</span><span class="tag">2EC202 · Nirma University</span>
@@ -348,9 +411,9 @@
     </div>
   </div>
 
-  <!-- 07 Log Analytics -->
+  <!-- 08 Log Analytics -->
   <div class="project-entry">
-    <div class="project-num-big">07</div>
+    <div class="project-num-big">08</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">DevOps · Scripting</span><span class="tag">Linux</span><span class="tag">3EC504ME24 · Nirma University · 2026</span>
@@ -382,9 +445,9 @@
     </div>
   </div>
 
-  <!-- 08 IoT Digital Communications -->
+  <!-- 09 IoT Digital Communications -->
   <div class="project-entry">
-    <div class="project-num-big">08</div>
+    <div class="project-num-big">09</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Review Paper</span><span class="tag">IoT · Communications</span><span class="tag">B.Tech ECE · Nirma University</span>
