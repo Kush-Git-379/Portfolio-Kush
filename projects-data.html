@@ -159,7 +159,7 @@
         <span class="tag">Sep 2025 · Nirma University</span>
       </div>
       <h2 class="project-title-big">Real-Time Virtual Try-On of Color-Adjustable Sunglasses using OpenCV</h2>
-      <p class="project-abstract">A real-time augmented reality virtual try-on system for sunglasses built entirely using classical computer vision, no deep learning or GPU required. The system detects faces and eyes via Viola-Jones Haar Cascade classifiers, estimates geometric pose from inter-pupillary distance and eye midpoint coordinates, and overlays a sunglasses model scaled and rotated to match head tilt. A key differentiating feature is on-the-fly color customization via HSV hue shifting; the hue channel is shifted modulo 180 while preserving brightness and the alpha channel, allowing seamless cycling through the full color spectrum without reloading assets. Frame-to-frame jitter is suppressed using Exponential Moving Average (α = 0.2) as a temporal low-pass filter on all positional parameters.</p>
+      <p class="project-abstract">A real-time augmented reality virtual try-on system for sunglasses built entirely using classical computer vision, no deep learning or GPU required. The system detects faces and eyes via Viola-Jones Haar Cascade classifiers, estimates geometric pose from inter-pupillary distance and eye midpoint coordinates, and overlays a sunglasses model scaled and rotated to match head tilt. A key differentiating feature is on-the-fly color customization via HSV hue shifting; the hue channel is shifted modulo 180 while preserving brightness and the alpha channel, allowing seamless cycling through the full color spectrum without reloading assets. Frame-to-frame jitter is suppressed using Exponential Moving Average (α = 0.2) as a temporal low-pass filter on all positional parameters. Written up as a paper, with Mitanshu Patel.</p>
       <div class="highlights-box">
         <h4>Technical Pipeline</h4>
         <ul>
@@ -169,6 +169,15 @@
           <li>Color customization: BGR→HSV conversion, hue channel shift (mod 180), alpha channel preserved and restored after conversion</li>
           <li>Temporal smoothing: EMA with α=0.2 on x, y, scale, and rotation, eliminates jitter without introducing lag</li>
           <li>Per-pixel alpha blending for seamless compositing of glasses onto live video stream</li>
+        </ul>
+      </div>
+      <div class="highlights-box">
+        <h4>Where It Breaks</h4>
+        <ul>
+          <li>Haar cascades are near-frontal detectors. Tilt past roughly 15 to 20 degrees of pitch or yaw and detection drops out</li>
+          <li>CLAHE helps under uneven lighting but does not rescue extreme backlighting or a very dark room</li>
+          <li>Fast head movement introduces motion blur, and tracking lags until a clean frame arrives</li>
+          <li>One change fixes all three: swap Haar cascades for a dense facial landmark model such as MediaPipe Face Mesh, which would also allow real 3D pose and perspective-correct overlay during head turns</li>
         </ul>
       </div>
       <div class="tech-breakdown">
