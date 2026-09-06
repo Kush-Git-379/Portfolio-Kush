@@ -377,43 +377,9 @@
     </div>
   </div>
 
-  <!-- 07 FPGA -->
+  <!-- 07 Log Analytics -->
   <div class="project-entry">
     <div class="project-num-big">07</div>
-    <div class="project-content">
-      <div class="project-meta">
-        <span class="tag accent">FPGA</span><span class="tag">Digital Design</span><span class="tag">2EC202 · Nirma University</span>
-      </div>
-      <h2 class="project-title-big">FPGA Digital Design, Wallace Tree Multiplier &amp; Fastest Finger First Game</h2>
-      <p class="project-abstract">Two digital design projects implemented on FPGA using Verilog HDL. The Wallace Tree Multiplier implements an 8×8 bit parallel multiplier producing a 16-bit output, reducing partial product addition to O(log n) stages using carry-save adder trees, significantly lower propagation delay than conventional O(n) array multipliers. The Fastest Finger First (FFF) buzzer system detects the first button press among multiple players with microsecond precision using finite state machines and hardware debounce logic. Both designs were fully verified with ModelSim testbenches before FPGA synthesis and timing closure in Quartus Prime.</p>
-      <div class="highlights-box">
-        <h4>Design Details</h4>
-        <ul>
-          <li>Wallace Tree: three-stage pipeline: partial product generation (AND gates), tree reduction (HA/FA carry-save adders), final carry-propagate addition</li>
-          <li>8×8 implementation produces all 64 partial products then reduces column-by-column; result[7] alone requires six full adders and one half adder in sequence</li>
-          <li>Simulation confirmed correct output in ModelSim (e.g., 10 × 11 = 110 decimal validated in waveform); RTL and TTL synthesis views confirmed tree structure</li>
-          <li>FFF game: FSM-based priority encoder with hardware debounce, first-press latency bounded by clock period, not software polling loop</li>
-          <li>Timing closure achieved post place-and-route in Quartus Prime; no setup/hold violations</li>
-        </ul>
-      </div>
-      <div class="tech-breakdown">
-        <h4>Technical Stack</h4>
-        <div class="tech-row">
-          <span class="tech-item">Verilog HDL</span><span class="tech-item">Quartus Prime</span><span class="tech-item">ModelSim</span><span class="tech-item">FPGA (Cyclone)</span><span class="tech-item">FSM Design</span><span class="tech-item">Testbenches</span>
-        </div>
-      </div>
-      <div style="margin-top:1.2rem;">
-        <div class="project-tags">
-          <span class="tag accent">FPGA</span><span class="tag">Verilog HDL</span><span class="tag">Wallace Tree</span><span class="tag">Quartus Prime</span><span class="tag">ModelSim</span><span class="tag">FSM</span><span class="tag">Hardware Arithmetic</span>
-        </div>
-      </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Report (Coming Soon)</a><a href="#" class="btn-small">GitHub</a></div>
-    </div>
-  </div>
-
-  <!-- 08 Log Analytics -->
-  <div class="project-entry">
-    <div class="project-num-big">08</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">DevOps · Scripting</span><span class="tag">Linux</span><span class="tag">3EC504ME24 · Nirma University · 2026</span>
@@ -445,9 +411,9 @@
     </div>
   </div>
 
-  <!-- 09 IoT Digital Communications -->
+  <!-- 08 IoT Digital Communications -->
   <div class="project-entry">
-    <div class="project-num-big">09</div>
+    <div class="project-num-big">08</div>
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Review Paper</span><span class="tag">IoT · Communications</span><span class="tag">B.Tech ECE · Nirma University</span>
