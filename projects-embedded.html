@@ -243,7 +243,7 @@
           <span class="tag accent">Cryptography</span><span class="tag">ASCON</span><span class="tag">AES</span><span class="tag">ECC</span><span class="tag">Python</span><span class="tag">NIST Lightweight</span><span class="tag">Benchmarking</span>
         </div>
       </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Report (Coming Soon)</a><a href="https://github.com/Kush-Git-379/crypto-algorithm-benchmark" target="_blank" class="btn-small">GitHub</a></div>
+      <div class="project-actions"><a href="https://github.com/Kush-Git-379/crypto-algorithm-benchmark" target="_blank" class="btn-small">GitHub</a></div>
     </div>
   </div>
 
@@ -277,7 +277,7 @@
           <span class="tag accent">IoT</span><span class="tag">ESP32</span><span class="tag">GPS</span><span class="tag">AES-128</span><span class="tag">MQTT</span><span class="tag">Embedded C++</span><span class="tag">Edge Security</span>
         </div>
       </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Report (Coming Soon)</a><a href="https://github.com/Kush-Git-379/esp32-gps-encryption-tracker" target="_blank" class="btn-small">GitHub</a></div>
+      <div class="project-actions"><a href="https://github.com/Kush-Git-379/esp32-gps-encryption-tracker" target="_blank" class="btn-small">GitHub</a></div>
     </div>
   </div>
 
@@ -339,7 +339,7 @@
         <span class="tag accent">Computer Architecture</span><span class="tag">gem5</span><span class="tag">3EC503CC24 · Nirma University · 2026</span>
       </div>
       <h2 class="project-title-big">L1 Cache Sensitivity Analysis: Matrix Multiplication vs AES Encryption using gem5</h2>
-      <p class="project-abstract">Microarchitectural simulation study using gem5 v25.1 on an X86 TimingSimpleCPU, comparing cache sensitivity across two fundamentally different workloads: a 100×100 matrix multiplication (~40kB working set, memory-intensive) and an AES SubBytes encryption benchmark (150kB payload, non-linear S-Box lookups). Three experiments were conducted, varying cache capacity (4kB→64kB) on each workload, and varying associativity (1-way→8-way) at fixed 16kB. The key finding is that cache optimization is strictly workload-dependent: matrix multiplication responds dramatically to both capacity and associativity, while AES is almost entirely insensitive to cache scaling.</p>
+      <p class="project-abstract">Microarchitectural simulation study using gem5 v25.1 on an X86 TimingSimpleCPU, run with Mitanshu Patel, comparing cache sensitivity across two fundamentally different workloads: a 100×100 matrix multiplication (~40kB working set, memory-intensive) and an AES SubBytes encryption benchmark (150kB payload, non-linear S-Box lookups). Four experiments: cache capacity (4kB→64kB) on each workload, associativity (1-way→8-way) at fixed 16kB, and finally L2 capacity and L1 line size at fixed 16kB. The key finding is that cache optimization is strictly workload-dependent: matrix multiplication responds dramatically to both capacity and associativity, while AES is almost entirely insensitive to cache scaling.</p>
 
       <div class="results-grid">
         <div class="result-cell"><div class="result-label">Matrix Miss Rate (4kB)</div><div class="result-value">5.06%</div></div>
@@ -359,6 +359,8 @@
           <li>Matrix multiplication is highly cache-sensitive: miss rate drops 99% (5.06%→0.04%) as cache grows large enough to hold the ~40kB working set</li>
           <li>AES SubBytes is cache-insensitive: the 256-byte S-Box fits even in a 4kB cache, so the bottleneck lies in instruction execution, not memory capacity</li>
           <li>At constrained 16kB, conflict misses dominate matrix multiply, 8-Way associativity reduces miss rate from 4.74% to 0.34% and improves IPC by 10.4%</li>
+          <li>Scaling L2 from 128kB to 256kB and then 512kB changed nothing at all: IPC held at 0.296 and L1 miss rate at 2.07% throughout. The ~40kB working set spilling out of L1 already fits in the baseline L2, so the extra capacity buys literally zero</li>
+          <li>Doubling the L1 line size from 64B to 128B made things worse, not better (IPC 0.296→0.292, misses 2.07%→2.63%). Matrices should benefit from spatial locality, but in a fixed 16kB cache the line count halves from 256 to 128, and the resulting conflict misses more than cancel the gain</li>
           <li>Practical recommendation for UAV flight controllers and IoT edge nodes: use highly-associative but modestly-sized caches; 8-Way at 16kB outperforms direct-mapped at the same size while avoiding the area and power cost of larger caches</li>
         </ul>
       </div>
@@ -373,7 +375,6 @@
           <span class="tag accent">Computer Architecture</span><span class="tag">gem5</span><span class="tag">Cache Analysis</span><span class="tag">AES</span><span class="tag">IPC</span><span class="tag">Microarchitecture</span><span class="tag">Cache Associativity</span>
         </div>
       </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Report (Coming Soon)</a><a href="#" class="btn-small">GitHub</a></div>
     </div>
   </div>
 
@@ -385,7 +386,7 @@
         <span class="tag accent">DevOps · Scripting</span><span class="tag">Linux</span><span class="tag">3EC504ME24 · Nirma University · 2026</span>
       </div>
       <h2 class="project-title-big">Log Analytics and Anomaly Detection Tool</h2>
-      <p class="project-abstract">A small monitoring tool in two halves, each written in the language that suited it. The Bash module (collector.sh) interfaces directly with Linux kernel utilities (top, free, df) via command substitution and pipelines, extracting CPU, memory, disk, and failed login metrics into a timestamped CSV, scheduled via cron for fully automated collection. The Python module (detector.py) parses the CSV with pandas, computes a statistical baseline (µ and σ) from historical data, and raises anomaly alerts when readings breach the dynamic µ+2σ threshold, dispatching automated email alerts via smtplib. Validated by CPU stress-testing with background loop processes that successfully triggered the threshold breach and alert pipeline.</p>
+      <p class="project-abstract">A small monitoring tool in two halves, each written in the language that suited it. Built with Mitanshu Patel. The Bash module (collector.sh) interfaces directly with Linux kernel utilities (top, free, df) via command substitution and pipelines, extracting CPU, memory, disk, and failed login metrics into a timestamped CSV, scheduled via cron for fully automated collection. The Python module (detector.py) parses the CSV with pandas, computes a statistical baseline (µ and σ) from historical data, and raises anomaly alerts when readings breach the dynamic µ+2σ threshold, dispatching automated email alerts via smtplib. Validated by CPU stress-testing with background loop processes that successfully triggered the threshold breach and alert pipeline.</p>
       <div class="highlights-box">
         <h4>System Design</h4>
         <ul>
@@ -407,7 +408,7 @@
           <span class="tag accent">DevOps</span><span class="tag">Bash</span><span class="tag">Python</span><span class="tag">Linux</span><span class="tag">Anomaly Detection</span><span class="tag">Statistical Thresholding</span><span class="tag">Automation</span>
         </div>
       </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Report (Coming Soon)</a><a href="https://github.com/Kush-Git-379/log-analytics-anomaly-detection" target="_blank" class="btn-small">GitHub</a></div>
+      <div class="project-actions"><a href="https://github.com/Kush-Git-379/log-analytics-anomaly-detection" target="_blank" class="btn-small">GitHub</a></div>
     </div>
   </div>
 
@@ -419,7 +420,7 @@
         <span class="tag accent">Review Paper</span><span class="tag">IoT · Communications</span><span class="tag">B.Tech ECE · Nirma University</span>
       </div>
       <h2 class="project-title-big">Applications of Digital Communication in IoT, Survey &amp; Smart Agriculture Case Study</h2>
-      <p class="project-abstract">A survey of the wireless technologies IoT deployments actually choose between, with smart agriculture as the worked example. The paper classifies IoT wireless technologies into three tiers, short-range (BLE, Zigbee, Wi-Fi), medium-range (LTE, 5G), and long-range LPWANs (LoRaWAN, Sigfox): and analyses each as a deliberate trade-off among the IoT design triangle of range, data rate, and battery life. Communication fundamentals covered include Shannon-Hartley capacity, CSS and GFSK modulation, FEC coding, DSSS/FHSS spread spectrum, and ALOHA vs CSMA/CA channel access for dense IoT deployments.</p>
+      <p class="project-abstract">A survey of the wireless technologies IoT deployments actually choose between, with smart agriculture as the worked example. Written with Mitanshu Patel and Krish Patel. The paper classifies IoT wireless technologies into three tiers, short-range (BLE, Zigbee, Wi-Fi), medium-range (LTE, 5G), and long-range LPWANs (LoRaWAN, Sigfox): and analyses each as a deliberate trade-off among the IoT design triangle of range, data rate, and battery life. Communication fundamentals covered include Shannon-Hartley capacity, CSS and GFSK modulation, FEC coding, DSSS/FHSS spread spectrum, and ALOHA vs CSMA/CA channel access for dense IoT deployments.</p>
       <div class="highlights-box">
         <h4>Key Technical Content</h4>
         <ul>
@@ -442,7 +443,6 @@
           <span class="tag accent">IoT</span><span class="tag">LoRaWAN</span><span class="tag">5G</span><span class="tag">MQTT</span><span class="tag">Smart Agriculture</span><span class="tag">UAV Relay</span><span class="tag">Digital Communications</span><span class="tag">LPWAN</span>
         </div>
       </div>
-      <div class="project-actions"><a href="#" class="btn btn-primary">Full Paper (Coming Soon)</a></div>
     </div>
   </div>
 
