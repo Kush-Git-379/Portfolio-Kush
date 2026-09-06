@@ -55,12 +55,18 @@
     .result-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
     .result-value { font-size: 0.92rem; font-weight: 500; color: var(--ink); }
     .result-value.accent { color: var(--accent); }
+    .ripes-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin: 1.5rem 0; max-width: 720px; }
+    .ripes-pair figure { margin: 0; }
+    .ripes-pair img { width: 100%; display: block; border: 1px solid var(--border); }
+    .ripes-pair figcaption { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-top: 0.5rem; }
+    .ripes-pair figcaption strong { color: var(--ink); font-weight: 500; }
     @media (max-width: 900px) {
       .page-hero { padding: 8rem 1.5rem 3rem; }
       .projects-list { padding: 3rem 1.5rem; }
       .project-entry { grid-template-columns: 1fr; gap: 1rem; }
       .project-num-big { font-size: 2rem; width: auto; text-align: left; }
       .results-grid { grid-template-columns: repeat(2, 1fr); }
+      .ripes-pair { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -153,53 +159,64 @@
     <div class="project-content">
       <div class="project-meta">
         <span class="tag accent">Computer Architecture</span>
-        <span class="tag">RISC-V · RV32IM</span>
+        <span class="tag">RISC-V · Ripes</span>
         <span class="tag">4EC502ME25 Modern Processor Architecture · 2026</span>
       </div>
       <h2 class="project-title-big">Cache Locality in RISC-V: Same Instructions, 11.8× Fewer Misses</h2>
-      <p class="project-abstract">Two changes to a 64×64 matrix multiply, both purely at source level, cut the L1 data-cache miss rate from 51.49% to 4.35%. Pad the row stride from 64 words to 65, then tile the loop nest at TB=4. The kernel does the same arithmetic and issues the identical 524,288 loads and 4,096 stores either way; only the addresses change. To measure it properly I wrote an RV32IM interpreter and a cache model in Python, roughly 1,500 lines, and swept 202 configurations through them.</p>
+      <p class="project-abstract">If two programs do identical work, the same instructions and the same reads and writes, but visit memory in a different order, how much can that order alone change the speed? I wrote pairs of RV32IM programs where only the access order differs, ran every one in Ripes on a 5-stage RV32IMC core, and read the hit rate straight off the simulator. Two source-level changes to a 64×64 matrix multiply took the miss rate from 51.5% to 4.3%. Presented as a class tutorial with Kartik Mangal.</p>
+
+      <div class="ripes-pair">
+        <figure>
+          <img src="img/ripes-colmajor.png" alt="Ripes cache tab showing 0 hits and 4096 misses for column-major traversal" loading="lazy"/>
+          <figcaption><strong>Column-major.</strong> Hit rate 0. Every one of 4,096 reads misses.</figcaption>
+        </figure>
+        <figure>
+          <img src="img/ripes-rowmajor.png" alt="Ripes cache tab showing 3072 hits and 1024 misses for row-major traversal" loading="lazy"/>
+          <figcaption><strong>Row-major.</strong> Hit rate 0.75, 3,072 hits. Same 32,967 instructions, same 4,096 reads.</figcaption>
+        </figure>
+      </div>
 
       <div class="results-grid">
-        <div class="result-cell"><div class="result-label">Naive matmul</div><div class="result-value">51.49% miss</div></div>
-        <div class="result-cell"><div class="result-label">Padded (lda 64→65)</div><div class="result-value">13.15% miss</div></div>
-        <div class="result-cell"><div class="result-label">Padded + tiled</div><div class="result-value accent">4.35% miss</div></div>
-        <div class="result-cell"><div class="result-label">Miss Reduction</div><div class="result-value accent">11.8×</div></div>
-        <div class="result-cell"><div class="result-label">Est. Speed-Up</div><div class="result-value">5.14×</div></div>
-        <div class="result-cell"><div class="result-label">Est. CPI</div><div class="result-value">8.34 → 1.62</div></div>
-        <div class="result-cell"><div class="result-label">Configurations Swept</div><div class="result-value">202</div></div>
-        <div class="result-cell"><div class="result-label">Benchmarks</div><div class="result-value">7, hand-written RV32IM</div></div>
-        <div class="result-cell"><div class="result-label">Baseline Cache</div><div class="result-value">4 KiB, 2-way, 16 B, LRU</div></div>
+        <div class="result-cell"><div class="result-label">Simulator</div><div class="result-value">Ripes, 5-stage RV32IMC</div></div>
+        <div class="result-cell"><div class="result-label">Cache</div><div class="result-value">4 KiB, 128 sets, 2-way</div></div>
+        <div class="result-cell"><div class="result-label">Policy</div><div class="result-value">LRU, write-back, write-allocate</div></div>
+        <div class="result-cell"><div class="result-label">Plain matmul</div><div class="result-value">51.5% miss</div></div>
+        <div class="result-cell"><div class="result-label">Padded (lda 64→65)</div><div class="result-value">13.2% miss</div></div>
+        <div class="result-cell"><div class="result-label">Padded + blocked</div><div class="result-value accent">4.3% miss</div></div>
+        <div class="result-cell"><div class="result-label">Loop order alone</div><div class="result-value accent">0% → 75% hit rate</div></div>
+        <div class="result-cell"><div class="result-label">Miss reduction</div><div class="result-value accent">11.8×</div></div>
+        <div class="result-cell"><div class="result-label">Matrix</div><div class="result-value">64 × 64</div></div>
       </div>
 
       <div class="highlights-box">
-        <h4>The Controlled Pairs</h4>
+        <h4>Changing the Program vs Changing the Hardware</h4>
         <ul>
-          <li>Every comparison is instruction-identical by construction. Row-major and column-major traversal both execute 32,967 instructions and 4,096 loads; the miss rate is 25% for one and 100% for the other. Nothing but the loop order differs</li>
-          <li>The three matmul kernels all pass an element-by-element check against a reference multiply, run with known non-zero inputs injected into the memory image so no initialisation code pollutes the trace</li>
-          <li>A 3C decomposition says which fix belongs to which problem. In the naive kernel 205,344 of 272,928 misses are conflict misses, so padding is the right tool; after padding the residual is mostly capacity, which is what tiling addresses</li>
-          <li>That distinction matters because associativity cannot rescue the naive version. The conflicts come from a power-of-two stride mapping whole rows onto the same sets, and only changing the stride removes them</li>
+          <li>The obvious counter-question is whether you could just buy a better cache instead. So I took the plain matmul and gave the cache more ways rather than touching the code</li>
+          <li>Going from 2-way to 4-way changed the hit rate by nothing at all: 48.5% either way. The conflicts come from a power-of-two row stride mapping whole rows onto the same sets, and doubling the ways does not break that pattern</li>
+          <li>Only a fully associative cache, 256 ways, fixed it, reaching 99.1%. That is not a design anyone ships; it is the proof that the problem was layout, not capacity</li>
+          <li>Adding one word per row costs 256 bytes and gets most of the same benefit. That is the actual engineering answer, and it is why real BLAS libraries pad their arrays</li>
         </ul>
       </div>
 
       <div class="highlights-box">
-        <h4>Where the Textbook Answer Is Wrong</h4>
+        <h4>Sorting the Misses</h4>
         <ul>
-          <li>Bigger blocks are supposed to help. Going 32 B → 64 B made the padded kernel <em>worse</em>, 6.76% → 18.51%, and the tiled kernel worse still, 4.59% → 18.96%. At fixed 4 KiB a bigger block means fewer lines, and the conflicts that returns outweigh the extra spatial locality</li>
-          <li>Tile size has an interior optimum at TB=4, not a monotone curve. Larger tiles overflow the cache, smaller ones lose reuse</li>
-          <li>Write policy changes no miss rate at all, but write-through moves 7.2× the bus traffic of write-back. A metric that only reports miss rate would call these identical</li>
-          <li>LRU is not always the winner; the replacement sweep finds configurations where Random beats it</li>
+          <li>Row-major reading is almost entirely compulsory misses, which are unavoidable: you have to touch each cache line once</li>
+          <li>The plain matrix multiply is mostly conflict misses, a layout problem, which is what padding fixes</li>
+          <li>After padding the remainder is mostly capacity, a size problem, which is what blocking fixes</li>
+          <li>Classifying the misses first is what tells you which of the two transformations to reach for. Applying them in the wrong order, or applying only one, leaves most of the gain on the table</li>
         </ul>
       </div>
 
       <div class="tech-breakdown">
         <h4>Technical Stack</h4>
         <div class="tech-row">
-          <span class="tech-item">RISC-V RV32IM assembly</span><span class="tech-item">Ripes</span><span class="tech-item">Python interpreter</span><span class="tech-item">Trace-driven cache model</span><span class="tech-item">Matplotlib</span><span class="tech-item">IEEE LaTeX</span>
+          <span class="tech-item">RISC-V RV32IM assembly</span><span class="tech-item">Ripes simulator</span><span class="tech-item">Cache configuration</span><span class="tech-item">Loop tiling</span><span class="tech-item">Array padding</span><span class="tech-item">3C miss analysis</span>
         </div>
       </div>
       <div style="margin-top:1.2rem;">
         <div class="project-tags">
-          <span class="tag accent">RISC-V</span><span class="tag">Computer Architecture</span><span class="tag">Cache Hierarchy</span><span class="tag">Locality Optimisation</span><span class="tag">Loop Tiling</span><span class="tag">Simulation</span><span class="tag">Assembly</span>
+          <span class="tag accent">RISC-V</span><span class="tag">Computer Architecture</span><span class="tag">Cache Hierarchy</span><span class="tag">Locality Optimisation</span><span class="tag">Loop Tiling</span><span class="tag">Assembly</span><span class="tag">Ripes</span>
         </div>
       </div>
     </div>
